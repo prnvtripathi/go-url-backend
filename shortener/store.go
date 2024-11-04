@@ -7,13 +7,13 @@ import (
 )
 
 // SaveURL stores the original URL, short code, and expiration time in the database.
-func SaveURL(originalURL, shortCode string, expiresAt *time.Time) error {
+func SaveURL(originalURL, name string, shortCode string, customCode bool, expiresAt *time.Time, customExpiry bool, created_by int) error {
 	query := `
-        INSERT INTO urls (original_url, short_code, expires_at)
-        VALUES ($1, $2, $3)
+        INSERT INTO urls (original_url, name, short_code, is_custom_code, expires_at, is_custom_expiry, created_by)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
     `
 
-	_, err := DB.Exec(context.Background(), query, originalURL, shortCode, expiresAt)
+	_, err := DB.Exec(context.Background(), query, originalURL, name, shortCode, customCode, expiresAt, customExpiry, created_by)
 	if err != nil {
 		return fmt.Errorf("failed to save URL: %v", err)
 	}
