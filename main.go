@@ -38,6 +38,8 @@ func main() {
 	})
 	http.HandleFunc("/shorten", shortener.ShortenURL) // Shorten URL handler
 	http.HandleFunc("/r/", redirect.RedirectHandler)  // Redirect handler
+	http.HandleFunc("/getUrls", getUrlsHandler)       // Get URLs handler
+	http.HandleFunc("/deleteUrl", deleteUrlHandler)   // Delete URL handler
 
 	// Start the server
 	fmt.Println("Server is running on port 8080...")

@@ -3,6 +3,7 @@ package shortener
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -51,4 +52,67 @@ func CheckCodeExists(code string) (bool, error) {
 
 	err := DB.QueryRow(context.Background(), query, code).Scan(&exists)
 	return exists, err
+}
+
+// URL represents a URL entry in the database.
+type URL struct {
+	OriginalURL string    `json:"original_url"`
+	Name        string    `json:"name"`
+	ShortCode   string    `json:"short_code"`
+	ExpiresAt   time.Time `json:"expires_at"`
+	UrlId       int       `json:"url_id"`
+}
+
+// GetAllUrls retrieves all URLs created by a user from the database.
+func GetAllUrls(userId int) ([]URL, error) {
+	query := `
+		SELECT original_url, name, short_code, expires_at, urlid
+		FROM urls
+		WHERE created_by = $1 AND is_deleted = false
+	`
+
+	rows, err := DB.Query(context.Background(), query, userId)
+	if err != nil {
+		log.Printf("Failed to get URLs: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var urls []URL
+	for rows.Next() {
+		var url URL
+		err := rows.Scan(&url.OriginalURL, &url.Name, &url.ShortCode, &url.ExpiresAt, &url.UrlId)
+		if err != nil {
+			log.Printf("Error scanning row: %v", err)
+			return nil, err
+		}
+		urls = append(urls, url)
+	}
+
+	// Check for any row iteration errors
+	if err := rows.Err(); err != nil {
+		log.Printf("Row iteration error: %v", err)
+		return nil, err
+	}
+
+	return urls, nil
+}
+
+// DeleteUrl marks a URL as deleted in the database for a specific user
+func DeleteUrl(urlId int, userId int) error {
+	query := `
+		UPDATE urls
+		SET is_deleted = true
+		WHERE urlid = $1 AND created_by = $2
+	`
+
+	// Use ExecContext with the provided context for better control
+	rows, err := DB.Query(context.Background(), query, urlId, userId)
+	if err != nil {
+		log.Printf("Failed to delete url: %v", err)
+		return err
+	}
+	defer rows.Close()
+
+	return nil
 }
