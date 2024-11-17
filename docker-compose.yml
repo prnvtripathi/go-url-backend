@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  go-url-backend:
+    build: .
+    environment:
+      DATABASE_URL: ${DATABASE_URL} # Pass the DATABASE_URL from .env file
+    ports:
+      - "8080:8080" # Expose your Go app on port 8080

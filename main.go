@@ -20,8 +20,8 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 // it logs the error and exits.
 func main() {
 
-	// Load environment variables from .env.local
-	err := godotenv.Load(".env.local")
+	// Load environment variables from .env file
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env.local file")
 	}
